@@ -6,7 +6,7 @@ export default class List extends Component {
     super();
     this.state = {
       hover: "",
-      pagearr:[1,2,3,4,5],
+      pagearr:[1],
       currPage:1,
       movies:[],
     };
@@ -23,9 +23,7 @@ export default class List extends Component {
         hover: '',
       });
   };
-
-  async componentDidMount(){
-
+   changeMovies = async () =>{
     const moviesList = await axios.get(
       
       `https://api.themoviedb.org/3/movie/popular?api_key=d8b656f2c04a84f9aaa970543f182237&language=en-US&page=${this.state.currPage}`
@@ -36,7 +34,43 @@ export default class List extends Component {
       movies:[...moviesList.data.results]
     });
     
+  }
 
+   handleNext = () => {
+
+    let temp = this.state.pagearr;
+    if(this.state.currPage == temp.length)
+    temp.push(temp.length+1) ;
+    
+    this.setState({
+      pagearr : [...temp],
+      currPage : this.state.currPage+1,
+
+    },this.changeMovies);
+
+  }
+
+  handlePrevious = () => {
+
+    this.setState({
+      
+      currPage : Math.max(1,this.state.currPage-1),
+
+    },this.changeMovies);
+
+  }
+
+  handlePage = (page) => {
+
+    this.setState({
+      
+      currPage : page,
+
+    },this.changeMovies);
+
+  }
+  async componentDidMount(){
+    this.changeMovies();
   }
   render() {
     let movie = this.state.movies; //fetch
@@ -51,7 +85,7 @@ export default class List extends Component {
             <h3 className="text-center">
               <strong>Trending</strong>
             </h3>
-            <div className="movies-list">
+            <div className="movies-list" id="come-here">
               {movie.map((movieObj) => (
                 <div
                   className="card movie-card"
@@ -83,23 +117,23 @@ export default class List extends Component {
             </div>
             <div className="pagination">
               <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                  <li class="page-item">
-                    <a class="page-link" href="#">
+                <ul className="pagination">
+                  <li className="page-item" onClick={this.handlePrevious}>
+                    <a className="page-link" href="#come-here">
                       Previous
                     </a>
                   </li>
                   
                   {
-                    this.state.pagearr.map(page => (<li class="page-item">
-                    <a class="page-link" href="#">
+                    this.state.pagearr.map(page => (<li className="page-item" onClick={()=>this.handlePage(page)}>
+                    <a className="page-link" href="#come-here">
                       {page}
                     </a>
                   </li>))
                   }
 
-                  <li class="page-item">
-                    <a class="page-link" href="#">
+                  <li className="page-item" onClick={this.handleNext}>
+                    <a className="page-link" href="#come-here">
                       Next
                     </a>
                   </li>
