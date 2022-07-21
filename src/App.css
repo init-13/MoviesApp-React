@@ -57,7 +57,7 @@
 .banner-text{
   position:absolute;
   color:white;
-  top:60vh;
+  top:57vh;
   left:5vw;
   margin-right: 5vw;
   /* overflow: hidden; */
@@ -109,6 +109,7 @@ position: relative;
 
   .banner-img{
     height:30vh;
+
   }
 
   .banner-title{
@@ -117,7 +118,7 @@ position: relative;
   }
 
   .banner-text{
-    top:15vh;
+    top:20vh;
     left:5vw;
   }
 

@@ -6,9 +6,10 @@ export default class List extends Component {
     super();
     this.state = {
       hover: "",
-      pagearr:[1],
+      pagearr:[1,2,3,4,5],
       currPage:1,
       movies:[],
+      favMovies:[],
     };
   }
 
@@ -71,6 +72,32 @@ export default class List extends Component {
   }
   async componentDidMount(){
     this.changeMovies();
+    const setfav = JSON.parse(localStorage.getItem("movies")).map(m=>m.id) || [];
+
+    this.setState({
+      favMovies: [...setfav]
+    });
+
+
+  }
+
+  handleFav = movieObj => {
+
+    let localstorageMovies = JSON.parse(localStorage.getItem("movies")) || []
+
+    if (localstorageMovies.filter(movie=>movie.id==movieObj.id).length>0)
+      localstorageMovies = localstorageMovies.filter(movie=>movie.id!=movieObj.id);
+    else localstorageMovies.push(movieObj);
+
+    localStorage.setItem("movies",JSON.stringify(localstorageMovies));
+
+    const settostate = localstorageMovies.map(m=>m.id);
+    this.setState({
+      favMovies: [...settostate]
+    });
+    console.log(localstorageMovies);
+    
+
   }
   render() {
     let movie = this.state.movies; //fetch
@@ -82,7 +109,7 @@ export default class List extends Component {
           </div>
         ) : (
           <div>
-            <h3 className="text-center">
+            <h3 className="text-center" style={{margin:"1rem"}}>
               <strong>Trending</strong>
             </h3>
             <div className="movies-list" id="come-here">
@@ -106,10 +133,13 @@ export default class List extends Component {
                         {movieObj.overview}
                       </p> */}
                   <div className="button-wrapper">
-                    {this.state.hover == movieObj.id && 
-                      <a href="#" class="btn btn-primary movie-button">
+                    {this.state.hover == movieObj.id && (!this.state.favMovies.includes(movieObj.id)?
+                      (<a onClick={()=>{this.handleFav(movieObj)}} class="btn btn-primary movie-button">
                         Add to Favourites
-                      </a>
+                      </a>):
+                      (<a onClick={()=>{this.handleFav(movieObj)}} class="btn btn-danger movie-button">
+                      Remove from Favourites
+                    </a>))
                     }
                   </div>
                 </div>
