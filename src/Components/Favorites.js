@@ -8,13 +8,18 @@ export default class Favorites extends Component {
         this.state={
 
             movies:[],
+             
             genreList:[], 
             currgenre:0,
             currsearch:"",
+             
+            limit: 5,
+            curPage:1
+
         }
     }
 
-   changeMovies = async () =>{
+   changeMovies = () =>{
     const moviesList = JSON.parse(localStorage.getItem("movies"));
     const tempgenreList = [0]
    
@@ -27,12 +32,19 @@ export default class Favorites extends Component {
       movies:[...moviesList],
       genreList:[...tempgenreList]
     });
+
+    console.log(this.state.movies);
+    
+    
     
   }
 
 handleSearch = event =>{
 
   const searchText = event.target.value.trim().toLowerCase();
+  
+  
+
 
   this.setState({
     currsearch:searchText,
@@ -41,6 +53,34 @@ handleSearch = event =>{
   console.log(this.state.currsearch);
   
 }
+
+handleLimit =   event =>{
+  
+  const newLimit = event?Math.max(1,event.target.value ):this.state.limit;
+  if(event)event.target.value = newLimit;
+
+  
+  
+  
+  let movie =  this.state.movies.filter(movieObj => (movieObj.original_title.toLowerCase().includes(this.state.currsearch)) && (this.state.currgenre==0 || movieObj.genre_ids.includes(this.state.currgenre) ));
+  
+  
+  //console.log(movie );
+  
+
+  
+  
+
+  this.setState({
+    limit:newLimit,
+     
+     
+  });
+  
+  console.log(this.state.pageAr);
+  
+}
+
 handleDelete = id =>{
   const newls = JSON.parse(localStorage.getItem("movies")).filter(movie=>movie.id!=id);
 
@@ -48,13 +88,28 @@ handleDelete = id =>{
 
   this.changeMovies();
 }
+
+handleSort = (param, order)=>{
+     let tempMovies = this.state.movies;
+
+     tempMovies.sort((a,b)=>order*(a[param]-b[param]));
+
+     this.setState({
+       movies:[...tempMovies]
+     });
+}
 addgenre = (genre)=>{
   this.setState({
     currgenre: genre
   });
 }
-    async componentDidMount(){
+   
+
+componentDidMount(){
+      
      this.changeMovies();
+     this.handleLimit();
+     
   }
 
     render() {
@@ -62,7 +117,23 @@ addgenre = (genre)=>{
         let genreId={0:'All Genre',28:'Action',12:'Adventure',16:'Animation',35:'Comedy',80:'Crime',99:'Documentary',18:'Drama',10751:'Family',14:'Fantasy',36:'History',
                         27:'Horror',10402:'Music',9648:'Mystery',10749:'Romance',878:'Sci-Fi',10770:'TV',53:'Thriller',10752:'War',37:'Western'}
 
-        return (
+        
+                        let movie = this.state.movies.filter(movieObj => (movieObj.original_title.toLowerCase().includes(this.state.currsearch)) && (this.state.currgenre==0 || movieObj.genre_ids.includes(this.state.currgenre) ));
+
+                        let si = (this.state.curPage - 1)*this.state.limit ;
+                        let ei = si + this.state.limit ; 
+
+                       let movieshow = movie.slice(si,ei);
+
+                       let numberpages = Math.ceil(movie.length / this.state.limit) ;
+   
+                  let pagear = [];
+                  for(let i = 1;i<=numberpages;i++)
+                  pagear.push(i);
+
+
+        
+                        return (
             <>
            
   <div class="row" style={{padding:"3rem"}}>
@@ -88,7 +159,7 @@ addgenre = (genre)=>{
       <div class="col favourites-table" >
           <div class="row">
             <input type="text" className="col-8" placeholder="Search" onChange={this.handleSearch}></input>
-            <input type="number" className="col-4" placeholder="5"></input>
+            <input type="number" className="col-4" placeholder="5" onChange={this.handleLimit}></input>
           </div>
           </div>
       <table class="table">
@@ -96,13 +167,18 @@ addgenre = (genre)=>{
     <tr style={{fontWeight:"bolder"}}>
       <th scope="col-5">Title</th>
                   <th scope="col">Genre</th>
-                  <th scope="col">Popularity</th>
-                  <th scope="col">Rating</th>
-                  <th scope="col"/>
+                  <th scope="col"> <i class="fa-solid fa-caret-down" onClick={()=>{this.handleSort("popularity",1)}}/> 
+                  Popularity 
+                  <i class="fa-solid fa-caret-up" onClick={()=>{this.handleSort("popularity",-1)}}/></th>
+                  
+                  <th scope="col"><i class="fa-solid fa-caret-down" onClick={()=>{this.handleSort("vote_average",1)}}/> 
+                  Rating  
+                  <i class="fa-solid fa-caret-up" onClick={()=>{this.handleSort("vote_average",-1)}}/></th>
+                  <th scope="col"/>     
     </tr>
   </thead>
   <tbody>
-   {this.state.movies.map((movieObj) =>(movieObj.original_title.toLowerCase().includes(this.state.currsearch)) && (this.state.currgenre==0 || movieObj.genre_ids.includes(this.state.currgenre) )&& (
+   { movieshow.map((movieObj,index) => (
                   <tr>
                     <td scope="row">
                       <img
@@ -112,8 +188,8 @@ addgenre = (genre)=>{
                       <span style={{fontWeight:"bold"}}>{movieObj.original_title}</span>
                     </td>
                     <td>{(this.state.currgenre==0)?genreId[movieObj.genre_ids[0]]:genreId[this.state.currgenre]}</td>
-                    <td>{movieObj.popularity}</td>
-                    <td>{movieObj.vote_average}</td>
+                    <td> {movieObj.popularity}</td>
+                    <td>  {movieObj.vote_average}</td>
                     <td>
                       <button class="btn btn-outline-danger" onClick={()=>{this.handleDelete(movieObj.id)}}>Delete</button>
                     </td>
@@ -121,6 +197,34 @@ addgenre = (genre)=>{
                 ))}
   </tbody>
 </table>
+
+<nav aria-label="...">
+  <ul class="pagination pagination-lg">
+
+    {pagear.map(page=>
+    
+    
+
+      this.state.curPage==page ?
+      
+      (<li class="page-item active" aria-current="page">
+      <span class="page-link" onClick={()=>{this.setState({curPage:page})}}>{page}</span>
+    </li>
+    ):
+
+    ( 
+      <li class="page-item" aria-current="page">
+    <span class="page-link" onClick={()=>{this.setState({curPage:page})}}>{page}</span>
+  </li>
+  
+    ) 
+      
+    )
+    }
+    
+    
+  </ul>
+</nav>
     </div>
   </div>
 
