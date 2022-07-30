@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { movies } from "./getMovies";
+
 import axios from "axios";
 export default class List extends Component {
   constructor() {
@@ -109,8 +109,8 @@ export default class List extends Component {
           </div>
         ) : (
           <div>
-            <h3 className="text-center" style={{margin:"1rem"}}>
-              <strong>Trending</strong>
+            <h3 className="text-center" style={{fontSize:"2rem", marginTop:"1.5rem"}}>
+              <strong class="badge text-bg-light  ">Trending</strong>
             </h3>
             <div className="movies-list" id="come-here">
               {movie.map((movieObj) => (
