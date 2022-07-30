@@ -3,6 +3,9 @@ A simple movie listing app. Movies are fetch from themoviedb.og. You can add mov
 
 ![Movie Listing App](/demo.gif)
 
+## To run the React App:
+>npm start
+
 ## Technologies used:
 1. HTML
 2. CSS
